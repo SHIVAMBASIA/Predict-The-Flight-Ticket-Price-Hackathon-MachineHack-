@@ -1,13 +1,13 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import pandas as pd
+import pandas_profiling
 
 #Training Dataset
 file='Data_Train.xlsx'
 x1=pd.ExcelFile(file)
 dataset=x1.parse('Sheet1')
 dataset=dataset[(dataset.isnull().sum(axis=1)==0)]
-#dataset = pd.read_csv('Yes_Bank_Training.csv')
 #X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 y=y.reshape((len(y),1))
@@ -20,6 +20,11 @@ dataset1=dataset1.drop("Price",1)
 #dataset1=dataset1.drop("Total_Stops",1)
 #dataset1=dataset1.drop("Arrival_Time",1)
 #dataset1=dataset1.drop("Duration",1)
+
+#EDA of training data
+profile=dataset.profile_report(title='EDA of Training Data')
+profile.to_file(output_file="eda_data_train.html")
+
 #Test Dataset
 file2='Test_set.xlsx'
 x2=pd.ExcelFile(file2)
@@ -39,7 +44,6 @@ y=np.delete(y,2878,0)
 #test=test.drop("Arrival_Time",1)
 #test=test.drop("Duration",1)
 #test=test.drop("Route",1)
-#test = pd.read_csv('Yes_Bank_Test.csv')
 X_test = test.iloc[:, :].values
 X_test1=X_test
 
@@ -164,53 +168,13 @@ classifier.fit(X_train, y)"""
 from sklearn.ensemble import RandomForestRegressor
 classifier = RandomForestRegressor(n_estimators = 300, random_state = 0)
 classifier.fit(X_train, y)
-# Test dataset
-#test = pd.read_csv('Yes_Bank_Test.csv')
-#test = test.drop('serial_number',1)
-#X_test = test.iloc[:, :].values
-#X_test=sc.transform(X_test)
 
 #Predicting the Test Result
 y_pred = classifier.predict(X_test)
-     
-#Transfoming Result into Object and then into DataFrame 
-"""result = []
-
-for i in range(340):
-    ind = np.argmax(y_pred[i])
-    result.append(ind)
-
-test = pd.read_csv('Yes_Bank_Test.csv')
-i = pd.DataFrame(test, columns=['serial_number'])
-r = pd.DataFrame(result, columns=['fake'])
-res = pd.concat([i, r], axis=1)
-
-#Converting the DataFrame into csv file
-res.to_csv('result13.csv',encoding='utf-8', index=False)
-
-
-#Creating RandomForestRegressor for our Model
-from sklearn.ensemble import RandomForestRegressor
-regressor = RandomForestRegressor(n_estimators = 300, random_state = 1)
-regressor.fit(X, y)
-
-#Predicting Result on the basis of our RandomForestRegressor
-y_pred = regressor.predict(X_test)
-"""
 y_pred=sc.inverse_transform(y_pred)
 #y_pred1=abs(y_pred.astype(int))
 y_pred1=y_pred
-#y_pred2=y_pred1-200
-writer6 = pd.ExcelWriter('example58.xlsx', engine='xlsxwriter')
-#Decoding the Categorical "outcome" Data
-#result=labelencoder_y.inverse_transform(result)
-#y_pred1=y_pred.astype(int)
-#result=labelencoder_y.inverse_transform(y_pred1)
+writer6 = pd.ExcelWriter('solution.xlsx', engine='xlsxwriter')
 resu1=pd.DataFrame(y_pred1, columns=['Price'])
 resu1.to_excel(writer6, 'Sheet1',index=False)
 writer6.save()
-
-
-
-
-
